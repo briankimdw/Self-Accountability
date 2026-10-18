@@ -1,16 +1,19 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { cheer, progress } from '../coach';
 import { addDays, formatDay, formatTime, todayKey } from '../dates';
 import { useTasks } from '../store';
 import { useTheme } from '../theme';
+import { useToast } from '../toast';
 import { Task } from '../types';
 
 export function TaskCard({ task, overdue = false }: { task: Task; overdue?: boolean }) {
   const c = useTheme();
   const { toggleDone, toggleStep, reschedule, removeTask } = useTasks();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState(false);
   const pct = progress(task);
 
   const onDone = async () => {
@@ -18,15 +21,8 @@ export function TaskCard({ task, overdue = false }: { task: Task; overdue?: bool
       task.done ? Haptics.NotificationFeedbackType.Warning : Haptics.NotificationFeedbackType.Success,
     ).catch(() => {});
     await toggleDone(task.id);
-    if (!task.done) Alert.alert('Promise kept', cheer(task.id));
+    if (!task.done) toast(cheer(task.id));
   };
-
-  // Alert buttons are a no-op on web, so delete directly there.
-  const onDelete = () =>
-    Platform.OS === 'web' ? removeTask(task.id) : Alert.alert('Delete goal?', task.title, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => removeTask(task.id) },
-    ]);
 
   return (
     <View
@@ -94,7 +90,14 @@ export function TaskCard({ task, overdue = false }: { task: Task; overdue?: bool
               <Action label={overdue ? 'Move to today' : 'Push to tomorrow'} color={c.text} border={c.border}
                 onPress={() => reschedule(task.id, overdue ? todayKey() : addDays(task.dateKey, 1))} />
             )}
-            <Action label="Delete" color={c.warn} border={c.border} onPress={onDelete} />
+            {confirm ? (
+              <>
+                <Action label="Yes, delete" color={c.warn} border={c.warn} onPress={() => removeTask(task.id)} />
+                <Action label="Cancel" color={c.text} border={c.border} onPress={() => setConfirm(false)} />
+              </>
+            ) : (
+              <Action label="Delete" color={c.warn} border={c.border} onPress={() => setConfirm(true)} />
+            )}
           </View>
         </View>
       )}

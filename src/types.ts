@@ -13,7 +13,5 @@ export type Task = {
   plan: Step[];
   done: boolean;
   doneAt?: number;
-  /** Ids of scheduled local notifications, so we can cancel them */
-  notifIds: string[];
   createdAt: number;
 };

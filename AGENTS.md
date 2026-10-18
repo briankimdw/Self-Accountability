@@ -26,8 +26,11 @@ Run lint and typecheck before declaring any task done.
 ## Project layout
 
 - `App.tsx`: app shell with a simple two-tab switcher (Today / Add goal). If more screens are added, migrate to Expo Router (https://docs.expo.dev/router/introduction.md).
-- `src/store.tsx`: task state, persisted with AsyncStorage (`src/storage.ts`). Every change that affects timing must cancel and reschedule notifications.
-- `src/notifications.ts`: local reminder schedule per task.
+- `src/lib/supabase.ts`: Supabase client. `src/auth.tsx`: sign-in gate.
+- `src/store.tsx`: goals. `src/data.tsx`: settings, job applications, gym. All read/write Supabase with optimistic updates.
+- `src/notifications.ts`: local reminders. Each device reconciles its scheduled notifications against the synced data (`syncGoalReminders`, `syncJobReminders`).
+- `src/jobs.ts`: URL normalization, company guessing, duplicate detection. `src/gym.ts`: PRs, last-time lookup.
+- `supabase/migrations/`: database schema with row level security on every table.
 - `src/coach.ts`: plan generation and encouragement copy. `src/streak.ts`: streak and follow-through stats.
 
 ## Building with EAS

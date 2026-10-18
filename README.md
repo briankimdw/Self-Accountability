@@ -4,16 +4,19 @@ A phone app (iOS and Android, built with Expo / React Native) that keeps you acc
 
 ## What it does
 
-- **Commit to a goal on a day and time.** Add what you'll do, when, how long it takes, and *why it matters*.
-- **Get a plan automatically.** Each goal is broken into small steps: a 2-minute setup, a 5-minute "just start" step, then focus blocks with breaks for longer goals. Check off steps as you go.
-- **Get reminded and nudged.** Local notifications fire:
-  - the night before (8 PM), with your first step
-  - that morning (8 AM), with your "why"
-  - 15 minutes before, and when it's time to start
-  - check-ins 1 hour and 3 hours later until you mark it done
-- **Stay encouraged.** Day streaks, a follow-through percentage, a "promise kept" message when you finish, and a "Missed" section that helps you move unfinished goals to today instead of quietly dropping them.
+- **Goals with a plan.** Commit to something on a day and time, say *why it matters*, and get a step-by-step plan (2-minute setup, a 5-minute "just start" step, then focus blocks with breaks).
+- **Reminders until it's done.** The night before, that morning, 15 minutes before, at start, then check-ins 1 and 3 hours later until you mark it done.
+- **Job application tracker.** Paste a posting URL and the company is filled in for you (Greenhouse, Lever, Ashby, Workday and more). Set a daily target, and see today's count, the last 7 days, and how many days in a row you've hit it. Reminders nudge you at 10 AM and 6 PM until you hit the target.
+  - **Duplicate detection:** the same posting is blocked even when the link has different tracking parameters (`utm_*`, `gh_src`, LinkedIn `currentJobId`, Indeed `jk`, ...). Applying to the same company and role again from a different link shows a warning.
+  - Track status (Applied, Interview, Offer, Rejected), search, and filter.
+- **Gym log.** Log workouts as exercises with sets of weight × reps. Tapping an exercise you've done before pre-fills last time's sets. Beating your previous best shows a 🏆 while you type. See personal records with estimated 1-rep max, workout history with total volume, and a nudge when it's been 3+ days.
+- **Synced everywhere.** Data lives in a Supabase (Postgres) database, so your phone and the web version show the same thing. Row level security means each account can only read and write its own rows.
 
-Everything stays on your phone. There's no account and no server.
+## Data
+
+Tables (see `supabase/migrations/`): `goals`, `job_applications`, `workouts`, `workout_sets`, `settings`. The app connects with the public URL and publishable key in `.env`. These are safe to ship because row level security protects the data. Never put a secret or service-role key in the app.
+
+New accounts confirm their email address by default. To skip that step, turn off **Confirm email** under Authentication → Sign In / Providers → Email in the Supabase dashboard.
 
 ## Run it on your phone
 

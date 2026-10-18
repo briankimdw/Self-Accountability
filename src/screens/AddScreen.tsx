@@ -36,10 +36,11 @@ export function AddScreen({ onSaved }: { onSaved: () => void }) {
   const save = async () => {
     if (!title.trim() || saving) return;
     setSaving(true);
-    await addTask({ title: title.trim(), why: why.trim(), dateKey, time, minutes });
+    const ok = await addTask({ title: title.trim(), why: why.trim(), dateKey, time, minutes });
+    setSaving(false);
+    if (!ok) return;
     setTitle('');
     setWhy('');
-    setSaving(false);
     onSaved();
   };
 
