@@ -65,10 +65,10 @@ export function AddScreen({ onSaved }: { onSaved: () => void }) {
       </ScrollView>
 
       <Label text="What time?" />
+      <Text style={[styles.time, { color: c.text }]}>{formatTime(time)}</Text>
       <View style={styles.timeRow}>
         <Chip label="−1h" onPress={() => shift(-60)} />
         <Chip label="−15m" onPress={() => shift(-15)} />
-        <Text style={[styles.time, { color: c.text }]}>{formatTime(time)}</Text>
         <Chip label="+15m" onPress={() => shift(15)} />
         <Chip label="+1h" onPress={() => shift(60)} />
       </View>
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', marginTop: 18, marginBottom: 8 },
   input: { borderWidth: 1, borderRadius: 12, padding: 12, fontSize: 16 },
   chip: { borderWidth: 1, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  timeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  time: { fontSize: 20, fontWeight: '700', minWidth: 96, textAlign: 'center' },
+  timeRow: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
+  time: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 10 },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   plan: { borderWidth: 1, borderRadius: 12, padding: 12 },
   save: { marginTop: 24, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
