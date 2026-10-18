@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { cheer, progress } from '../coach';
 import { addDays, formatDay, formatTime, todayKey } from '../dates';
 import { useTasks } from '../store';
@@ -21,8 +21,9 @@ export function TaskCard({ task, overdue = false }: { task: Task; overdue?: bool
     if (!task.done) Alert.alert('Promise kept', cheer(task.id));
   };
 
+  // Alert buttons are a no-op on web, so delete directly there.
   const onDelete = () =>
-    Alert.alert('Delete goal?', task.title, [
+    Platform.OS === 'web' ? removeTask(task.id) : Alert.alert('Delete goal?', task.title, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => removeTask(task.id) },
     ]);
