@@ -4,6 +4,8 @@ A phone app (iOS and Android, built with Expo / React Native) that keeps you acc
 
 ## What it does
 
+Three screens: **Today** (progress rings, a timeline of today's goals, what you logged, what's coming up, job-search and strength progress), **Calendar** (month view with a dot per goal, application and workout; tap a day to see everything on it) and **Add** (one place to add a goal, log a job application, or log a workout). Works on phones and as a wide two-column layout on a computer, in light and dark mode.
+
 - **Goals with a plan.** Commit to something on a day and time, say *why it matters*, and get a step-by-step plan (2-minute setup, a 5-minute "just start" step, then focus blocks with breaks).
 - **Reminders until it's done.** The night before, that morning, 15 minutes before, at start, then check-ins 1 and 3 hours later until you mark it done.
 - **Job application tracker.** Paste a posting URL and the company is filled in for you (Greenhouse, Lever, Ashby, Workday and more). Set a daily target, and see today's count, the last 7 days, and how many days in a row you've hit it. Reminders nudge you at 10 AM and 6 PM until you hit the target.

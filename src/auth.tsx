@@ -1,6 +1,8 @@
 import { Session } from '@supabase/supabase-js';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Button, Field, T } from './components/ui';
 import { supabase } from './lib/supabase';
 import { useTheme } from './theme';
 
@@ -57,38 +59,38 @@ function SignIn() {
     setBusy(false);
   };
 
-  const input = [styles.input, { backgroundColor: c.card, borderColor: c.border, color: c.text }];
   const ready = !!email.trim() && password.length >= 6;
 
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.h1, { color: c.text }]}>Self Accountability</Text>
-      <Text style={{ color: c.muted, marginBottom: 24 }}>
-        Sign in to sync your goals, job applications and workouts across your phone and computer.
-      </Text>
-      <TextInput nativeID="email" style={input} value={email} onChangeText={setEmail} placeholder="Email"
-        placeholderTextColor={c.muted} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
-      <TextInput nativeID="password" style={input} value={password} onChangeText={setPassword}
-        placeholder="Password (6+ characters)" placeholderTextColor={c.muted} secureTextEntry
-        autoComplete={mode === 'in' ? 'current-password' : 'new-password'} onSubmitEditing={submit} />
-      {msg && <Text style={{ color: msg.error ? c.warn : c.accent, marginTop: 4 }}>{msg.text}</Text>}
-      <Pressable onPress={submit} disabled={!ready || busy}
-        style={[styles.btn, { backgroundColor: c.accent, opacity: ready && !busy ? 1 : 0.4 }]}>
-        <Text style={styles.btnText}>{busy ? 'One moment…' : mode === 'in' ? 'Sign in' : 'Create account'}</Text>
-      </Pressable>
-      <Pressable onPress={() => { setMode(mode === 'in' ? 'up' : 'in'); setMsg(null); }} style={{ padding: 12 }}>
-        <Text style={{ color: c.accent, textAlign: 'center', fontWeight: '600' }}>
-          {mode === 'in' ? 'New here? Create an account' : 'Have an account? Sign in'}
-        </Text>
-      </Pressable>
+      <View style={styles.inner}>
+        <View style={[styles.mark, { backgroundColor: c.goal }]}>
+          <Ionicons name="checkmark-done" size={26} color={c.onAccent} />
+        </View>
+        <T v="hero">Self Accountability</T>
+        <T v="body" color={c.muted} style={{ marginBottom: 12 }}>
+          Do what you said you would. Goals, job applications and workouts, synced across your phone and computer.
+        </T>
+        <Field nativeID="email" label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com"
+          autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
+        <Field nativeID="password" label="Password" value={password} onChangeText={setPassword}
+          placeholder="Password (6+ characters)" secureTextEntry
+          autoComplete={mode === 'in' ? 'current-password' : 'new-password'} onSubmitEditing={submit} />
+        {msg && <T v="small" color={msg.error ? c.danger : c.goal}>{msg.text}</T>}
+        <Button label={busy ? 'One moment…' : mode === 'in' ? 'Sign in' : 'Create account'} onPress={submit}
+          disabled={!ready || busy} style={{ marginTop: 6 }} />
+        <Pressable onPress={() => { setMode(mode === 'in' ? 'up' : 'in'); setMsg(null); }} style={{ padding: 12 }}>
+          <T v="smallStrong" color={c.goal} style={{ textAlign: 'center' }}>
+            {mode === 'in' ? 'New here? Create an account' : 'Have an account? Sign in'}
+          </T>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, justifyContent: 'center', padding: 24, gap: 10 },
-  h1: { fontSize: 28, fontWeight: '800' },
-  input: { borderWidth: 1, borderRadius: 12, padding: 14, fontSize: 16 },
-  btn: { marginTop: 8, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
-  btnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  wrap: { flex: 1, justifyContent: 'center', padding: 24 },
+  inner: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 14 },
+  mark: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
 });

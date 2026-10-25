@@ -9,8 +9,8 @@ import { useToast } from './toast';
 
 /* ---------- Settings ---------- */
 
-type Settings = { daily_app_target: number; weight_unit: Unit };
-const DEFAULT_SETTINGS: Settings = { daily_app_target: 5, weight_unit: 'lb' };
+type Settings = { daily_app_target: number; weight_unit: Unit; gym_weekly_target: number };
+const DEFAULT_SETTINGS: Settings = { daily_app_target: 5, weight_unit: 'lb', gym_weekly_target: 3 };
 
 type SettingsStore = Settings & { update: (s: Partial<Settings>) => Promise<void> };
 const SettingsCtx = createContext<SettingsStore | null>(null);
@@ -21,7 +21,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
-    supabase.from('settings').select('daily_app_target, weight_unit').maybeSingle().then(({ data }) => {
+    supabase.from('settings').select('daily_app_target, weight_unit, gym_weekly_target').maybeSingle().then(({ data }) => {
       if (data) setSettings(data as Settings);
     });
   }, []);

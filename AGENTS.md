@@ -25,13 +25,15 @@ Run lint and typecheck before declaring any task done.
 
 ## Project layout
 
-- `App.tsx`: app shell with a simple two-tab switcher (Today / Add goal). If more screens are added, migrate to Expo Router (https://docs.expo.dev/router/introduction.md).
+- `App.tsx`: app shell. Three tabs (Today, Calendar, Add) via `src/nav.tsx`; top bar on wide screens (>= 960px), bottom bar on phones.
+- `src/screens/`: `TodayScreen` (rings, missed, today's timeline, coming up, job and strength progress), `CalendarScreen` (month grid + day agenda), `AddScreen` (segmented Goal / Application / Workout forms in `src/forms/`).
+- `src/components/items.tsx`: goal, application and workout items plus `DayAgenda`. `src/components/Calendar.tsx`: month grid and week strip. `src/components/ui.tsx`: design-system primitives (`T`, `Card`, `Button`, `Chip`, `Ring`, ...).
+- `src/theme.ts`: color tokens (light/dark) with one hue per kind (goal green, job blue, gym orange) and font names. Fonts are Bricolage Grotesque (display) and DM Sans (body), loaded in `App.tsx`.
 - `src/lib/supabase.ts`: Supabase client. `src/auth.tsx`: sign-in gate.
 - `src/store.tsx`: goals. `src/data.tsx`: settings, job applications, gym. All read/write Supabase with optimistic updates.
-- `src/notifications.ts`: local reminders. Each device reconciles its scheduled notifications against the synced data (`syncGoalReminders`, `syncJobReminders`).
+- `src/notifications.ts`: local reminders. Each device reconciles its scheduled notifications against the synced data.
 - `src/jobs.ts`: URL normalization, company guessing, duplicate detection. `src/gym.ts`: PRs, last-time lookup.
 - `supabase/migrations/`: database schema with row level security on every table.
-- `src/coach.ts`: plan generation and encouragement copy. `src/streak.ts`: streak and follow-through stats.
 
 ## Building with EAS
 

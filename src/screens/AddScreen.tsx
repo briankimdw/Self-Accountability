@@ -1,132 +1,49 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { buildPlan } from '../coach';
-import { addDays, formatDay, formatTime, fromDateKey, todayKey } from '../dates';
-import { useTasks } from '../store';
+import { View } from 'react-native';
+import { Screen } from '../components/Screen';
+import { Segmented, T } from '../components/ui';
+import { GoalForm } from '../forms/GoalForm';
+import { JobForm } from '../forms/JobForm';
+import { WorkoutForm } from '../forms/WorkoutForm';
+import { formatDay, todayKey } from '../dates';
+import { AddKind, useNav } from '../nav';
 import { useTheme } from '../theme';
 
-const EFFORT = [15, 30, 60, 90, 120, 180];
-const pad = (n: number) => String(n).padStart(2, '0');
+const SUBTITLE: Record<AddKind, string> = {
+  goal: 'Pick a day and time. You get a step-by-step plan and reminders until it is done.',
+  job: 'Paste the posting link. Duplicates are caught automatically.',
+  workout: 'Log exercises, weight and reps. Exercises you have done before fill in from last time.',
+};
 
-function defaultTime() {
-  const d = new Date(Date.now() + 60 * 60_000);
-  return `${pad(d.getHours())}:00`;
-}
-
-export function AddScreen({ onSaved }: { onSaved: () => void }) {
+export function AddScreen() {
   const c = useTheme();
-  const { addTask } = useTasks();
-  const [title, setTitle] = useState('');
-  const [why, setWhy] = useState('');
-  const [dateKey, setDateKey] = useState(todayKey());
-  const [time, setTime] = useState(defaultTime());
-  const [minutes, setMinutes] = useState(30);
-  const [saving, setSaving] = useState(false);
-
-  const days = useMemo(() => Array.from({ length: 14 }, (_, i) => addDays(todayKey(), i)), []);
-  const plan = useMemo(() => buildPlan(title.trim() || 'your goal', minutes), [title, minutes]);
-  const inPast = fromDateKey(dateKey, time).getTime() < Date.now();
-
-  const shift = (mins: number) => {
-    const [h, m] = time.split(':').map(Number);
-    const total = (h * 60 + m + mins + 1440) % 1440;
-    setTime(`${pad(Math.floor(total / 60))}:${pad(total % 60)}`);
-  };
-
-  const save = async () => {
-    if (!title.trim() || saving) return;
-    setSaving(true);
-    const ok = await addTask({ title: title.trim(), why: why.trim(), dateKey, time, minutes });
-    setSaving(false);
-    if (!ok) return;
-    setTitle('');
-    setWhy('');
-    onSaved();
-  };
-
-  const input = [styles.input, { backgroundColor: c.card, borderColor: c.border, color: c.text }];
+  const nav = useNav();
+  const { intent } = nav;
+  const kind = intent.kind;
+  const switchTo = (k: AddKind) => nav.openAdd(k, intent.date);
+  const done = (date: string) => (date === todayKey() ? nav.go('today') : nav.openCalendar(date));
 
   return (
-    <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
-      <Text style={[styles.h1, { color: c.text }]}>New commitment</Text>
-
-      <Label text="What will you do?" />
-      <TextInput style={input} value={title} onChangeText={setTitle}
-        placeholder="e.g. Go for a 3 mile run" placeholderTextColor={c.muted} returnKeyType="next" />
-
-      <Label text="Why does it matter? (shown in reminders)" />
-      <TextInput style={input} value={why} onChangeText={setWhy}
-        placeholder="e.g. I want to feel strong for the race" placeholderTextColor={c.muted} />
-
-      <Label text="Which day?" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-        {days.map((d) => (
-          <Chip key={d} label={formatDay(d)} active={d === dateKey} onPress={() => setDateKey(d)} />
-        ))}
-      </ScrollView>
-
-      <Label text="What time?" />
-      <Text style={[styles.time, { color: c.text }]}>{formatTime(time)}</Text>
-      <View style={styles.timeRow}>
-        <Chip label="−1h" onPress={() => shift(-60)} />
-        <Chip label="−15m" onPress={() => shift(-15)} />
-        <Chip label="+15m" onPress={() => shift(15)} />
-        <Chip label="+1h" onPress={() => shift(60)} />
+    <Screen max={640}>
+      <View style={{ gap: 6, marginBottom: 18 }}>
+        <T v="label" color={c.muted}>{intent.date ? `For ${formatDay(intent.date).toLowerCase()}` : 'Add'}</T>
+        <T v="hero">{intent.workout ? 'Edit workout' : 'What are you committing to?'}</T>
       </View>
-      {inPast && <Text style={{ color: c.warn, marginTop: 6 }}>That time already passed today. Pick a later time.</Text>}
-
-      <Label text="How long will it take?" />
-      <View style={styles.wrapRow}>
-        {EFFORT.map((m) => (
-          <Chip key={m} label={m < 60 ? `${m} min` : `${m / 60} hr`} active={m === minutes} onPress={() => setMinutes(m)} />
-        ))}
+      {!intent.workout && (
+        <Segmented value={kind} onChange={switchTo} options={[
+          { key: 'goal', label: 'Goal', icon: 'flag', color: c.goal },
+          { key: 'job', label: 'Application', icon: 'briefcase', color: c.job },
+          { key: 'workout', label: 'Workout', icon: 'barbell', color: c.gym },
+        ]} />
+      )}
+      <T v="small" color={c.muted} style={{ marginTop: 12, marginBottom: 18 }}>{SUBTITLE[kind]}</T>
+      <View key={`${kind}-${intent.nonce}`}>
+        {kind === 'goal' && <GoalForm initialDate={intent.date} onSaved={done} />}
+        {kind === 'job' && <JobForm initialDate={intent.date} />}
+        {kind === 'workout' && (
+          <WorkoutForm workout={intent.workout} initialDate={intent.date} onSaved={done}
+            onCancel={intent.workout ? () => nav.openCalendar(intent.workout!.performed_on) : undefined} />
+        )}
       </View>
-
-      <Label text="Your plan" />
-      <View style={[styles.plan, { backgroundColor: c.card, borderColor: c.border }]}>
-        {plan.map((s, i) => (
-          <Text key={s.id} style={{ color: c.text, paddingVertical: 3 }}>
-            {i + 1}. {s.text}
-          </Text>
-        ))}
-        <Text style={{ color: c.muted, marginTop: 8, fontSize: 12 }}>
-          Reminders: the night before, that morning, 15 min before, at start, then check-ins until it's done.
-        </Text>
-      </View>
-
-      <Pressable onPress={save} disabled={!title.trim() || inPast || saving}
-        style={[styles.save, { backgroundColor: c.accent, opacity: !title.trim() || inPast || saving ? 0.4 : 1 }]}>
-        <Text style={styles.saveText}>{saving ? 'Saving…' : 'Commit to it'}</Text>
-      </Pressable>
-    </ScrollView>
+    </Screen>
   );
 }
-
-function Label({ text }: { text: string }) {
-  const c = useTheme();
-  return <Text style={[styles.label, { color: c.muted }]}>{text}</Text>;
-}
-
-function Chip({ label, active, onPress }: { label: string; active?: boolean; onPress: () => void }) {
-  const c = useTheme();
-  return (
-    <Pressable onPress={onPress}
-      style={[styles.chip, { borderColor: active ? c.accent : c.border, backgroundColor: active ? c.accentSoft : c.card }]}>
-      <Text style={{ color: active ? c.accent : c.text, fontWeight: active ? '700' : '500' }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-const styles = StyleSheet.create({
-  wrap: { padding: 16, paddingBottom: 60 },
-  h1: { fontSize: 24, fontWeight: '700', marginTop: 8 },
-  label: { fontSize: 13, fontWeight: '600', marginTop: 18, marginBottom: 8 },
-  input: { borderWidth: 1, borderRadius: 12, padding: 12, fontSize: 16 },
-  chip: { borderWidth: 1, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  timeRow: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
-  time: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 10 },
-  wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  plan: { borderWidth: 1, borderRadius: 12, padding: 12 },
-  save: { marginTop: 24, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
-  saveText: { color: '#fff', fontSize: 17, fontWeight: '700' },
-});
